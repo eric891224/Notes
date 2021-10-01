@@ -1,0 +1,333 @@
+要記得重學：4.9 4.10(ajax request) 4.13 4.14(react-transition-group有必要在學動畫)
+
+使用git時
+	git clone --recurse-submodules (repo ssh連結)
+	然後刪除資料夾內的.git資料夾，push回github
+
+建立開發環境：npx create-react-app <新建目錄名>
+	若報錯：npm cache clean --force
+	進到工作目錄後(cd <目錄名>)：
+		npm run start
+		或
+		yarn start	會開啟一個初始化的react頁面(localhost:3000)
+
+工作目錄文件介紹
+	yarn.lock：安裝包文件，一般不會動
+	README.md：說明文件，可自行更改內容(markdown語法)
+	package.json：第三方連結以及內建命令，一般也不會動
+	node_modules目錄：第三方套件，一般不會動
+	public目錄：網站的生成文件
+	src目錄：js、css檔案等等，其中index.js會用來調用那些檔案
+
+index.js檔案(react程式的入口)：all in js
+	可直接import react的原因是在建立工作目錄時，package.json就已經指定下載相關套件
+	import App from './App'
+		會自動幫./App補上./App.js，App.js檔案會引入logo.svg(即初始頁面的旋轉logo)
+		App.js檔案定義頁面樣式即內容再被引入到index.js來渲染到頁面上
+
+	註：因為React重視all in js的概念，所以大部分的內容都會在index.js及App.js內實現
+
+可刪除的文件(注意index.js、App.js內的程式碼也要更改)
+	src/index.css：頁面的基本樣式
+		index.js內可刪除import './index.css'
+	src/logo.svg：旋轉的logo
+		App.js內可刪除import logo from './logo.svg'及<img ...>
+	src/reportWebVitals.js
+		index.js內可刪除import reportWebVitals from './reportWebVitals'及reportWebVitals()
+	src/App.css：為頁面的樣式文件
+		App.js內可刪除import './App.css'
+	src/setupTests.js：自動測試文件
+	public/manifest.json：頁面緩存
+		index.html內可刪除<link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+JSX語法
+	註釋：{/*<內容>*/}
+	
+	當元素內的property有class時，建議改成className，因為react可能會將class搞混成定義組件的class
+
+	label和id的互動
+		<label htmlFor="<id名>">輸入內容</label>
+		<input id="<id名>"/>
+		當滑鼠點擊頁面上的"輸入內容"時，會自動跳到input格(以htmlFor來指向目標)
+	
+	property
+		dangerouslySetInnerHTML={{__html: item}}
+			若item中含有html標籤(如<h1></h1>)，會以html格式顯示，不會以字串顯示
+	
+組件(component)檔案：以jsx語法編寫，注意所有標籤都要被一個大的包裹元素所包含(如<div>)
+	開頭先導入必要套件(react)等等：
+		import React, {Component} from 'react';
+		其中{Component}代表：
+			import React from 'react';
+			const Component = react.Component
+			為結構賦值的方法，同樣方法也可以用於導入react.Fragment
+
+		Fragment的用處：因為所有標籤都要被一個大的包裹元素所包含，若不想於網頁inspector看到最外層，用Fragment就不會被顯示
+
+	編寫組件，需要先繼承react.Component：			註：因為已於頭導入react.Component為Component，故不需在繼承時寫...extends react.Component
+		class <組件名(首字要大寫)> extends Component{
+			constructor(props) {			註：constructor類似__init__，若需要對數據操作則需要constructor來定義數據。constuctor接受props，為父類別Component的一個物件，故須以super(props)來繼承
+				super(props);
+				this.state = {			註：this.state中的資料為自訂義，值為初始化所用
+					<一些資料>: <值>
+				}
+			}
+
+			render() {
+				return (
+					<組件功能內容>		註：若要以事件監聽來操作數據，注意大小寫(如onClick、onChange等等)。若要對數據做操作，則以自訂義method來操作(且要記得以<method>.bind(this)綁定this，否則會報undefined)
+				);				    bind(this)除了可以綁定this，也可以傳遞當下其他的參數，如bind(this, <參數1>, <參數2>...)，在定義method時會方便很多
+			}
+
+			<method>(e) {					註：此為於render內使用的自訂義method，接受參數e(或綁定時所傳遞的參數)，可用console.log(e)印出詳細資訊，通常會存取e.target.value
+				this.setState({<一些資料>: <新值>});	註：不能用this.state.<一些資料> = <新值>來改變數據，必須用this.setState({})來操作
+			}
+		}
+	
+	於結尾導出組件：
+		export default <組件名>;
+
+組件的拆分：可以把某個小功能再以組件的形式建立，最後整個project看起來會像是樹狀結構，由多對父子組件結合而成
+	參數或method的向下傳遞：以todolists為例
+		若要將TodoList當中ul的item傳遞到TodoItem，以給property的方式傳遞參數並乎叫<TodoItem content={item}/>，其中content為自訂義名稱
+		而在TodoItem當中若要使用傳遞下來的參數或method，須以{this.props.content}來存取參數
+
+	在子組件檢驗從父組件傳遞下來的參數型態是否正確：PropTypes
+		import PropTypes from 'prop-types'; //於子組件導入檢驗工具
+
+		<子組件名>.propTypes = {
+			content: PropTypes.string,
+			deleteItem: PropTypes.func,
+			index: PropTypes.number
+		}
+		
+		也可以用defaultProps來設定預設資料型態
+		<子組件名>.defaultProps = {
+			test: "hello world"
+		}
+
+生命週期函數：在某一個時刻組件會自動呼叫執行的函數
+	Initialization初始化過程
+		constructor裡面的state和props初始化
+
+	Mounting掛載過程
+		componentWillMount()：組件在頁面即將渲染前執行，只會在第一次執行
+		render()：渲染
+		componentDidMount()：組件在頁面渲染後執行，只會在第一次執行
+			通常會在此下ajxa request
+
+	Updating更新過程
+		若PROPS發生變化
+			componentWillReceiveProps()：當前組件的父組件傳遞參數下來時執行
+				父組件有傳參數下來，且當前組件已經存在於父組件了(即第一次render後不會執行)
+
+		STATE發生變化(不論PROPS有無變化都會跑下面流程)
+			shouldComponentUpdate(nextProps, nextState)：每次更新前執行，要求返回true/false
+				若要回傳true則繼續更新；若回傳false，則不繼續執行更新過程
+				其中nextProps相當於更新後的this.porps；nextState相當於更新後的this.state
+			componentWillUpdate()：在shouldComponentUpdate()回傳true後才執行
+			render()：渲染/更新
+			componentDidUpdate()：組件更新完成後執行
+
+	Unmounting去除過程
+		componentWillUnmount()：當前組件(應為子組件)即將從頁面移除的時候執行
+
+Ajax請求
+	charles mock用法：將瀏覽器的網址的localhost改成localhost.charlesproxy.com，其他一樣
+		在charles -> tool -> map local中的host輸入原本只有local後的網址，path輸入自訂路徑
+		在map to輸入該檔案在本機的路徑
+		
+		注意charles關閉後localhost.charlesproxy.com會失效
+
+Redux
+	於工作目錄
+		yarn add redux	然後於src內創新資料夾名store，內含新的index.js(即store的創建位置)、reducer.js
+
+	index.js內
+		import {createStore} from 'redux';
+		import reducer from './reducer';	//自行創建的檔案
+		const store = createStore(reducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()); //REDUX_DEVTOOLS為一個redux中間架
+		export default store;
+
+	reducer.js內
+		const defaultState = {};	//可自訂義初始State
+		const reducer = (state = defaultState, acion) => {
+			if...(在組建定義的action)
+				return newState;
+			return state;
+		}
+		export default reducer;
+
+	於src內的index.js更改以下
+		import store from './store/index';	//導入store
+
+		constructor內的this.state改為接收store.getState()
+			this.state = store.getState();	//於網站應可看見reducer內定義的defaultState內容
+
+		method內以const action = {type,參數}的方式建立action，然後以store.dispatch(action)將指令及參數傳給store
+
+		新增handleStoreChange(){this.setState(store.getStore())}
+
+		componentDidMount內用store.subscribe(this.handleStoreChange)，才不會報錯
+
+	以actionTypes.js來管理action
+		於新建store/actionTypes.js，其內以export const (capitalized action type) = '(action type)';來導出，優點為易管理且可偵測打錯字
+
+	以actionCreators.js管理action的建立
+		於新建store/actionCreators.js，其內以export const (functionname) = (接受參數) => {type,參數}來導出action，優點為易讀性高且易維護
+
+	以...UI.js來單獨處理DOM架構，其內使用函式型組件，優點為效率較高(因為不必進行多餘的生命週期函數)
+
+	工作流程：在store/index.js用createStore；於組件寫好method，method內含action；reducer內寫好action操作數據的方法；用store.dspactch(action)傳遞給store，store會與reducer交換新舊數據
+
+	tips
+		為了方便維護，可以用actionTypes以及actionCreators來集中管理action指令
+
+		UI組件(以函式定義)可與邏輯組件分開，效率高且可讀性高
+
+redux-thunk middleware(中間件)：使用redux-thunk後，原本actionCreators只能返回object，現在可以返回函數(如異步函數)
+	工作目錄內
+		yarn add redux-thunk
+
+	於./store/index.js內
+		import {applyMiddleware} from 'redux';		註：原本有引入createStore在這邊不特別提
+		import thunk from 'redux-thunk';
+		因為要同時使用REDUX_DEVTOOLS_EXTENTION(也是一middleware)，故照其github指示
+		import {applyMiddleware, compose} from 'redux';
+		const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({}) : compose;
+		const enhancer = composeEnhancers(applyMiddleware(thunk),);	註：若有其他中間架也可以往下填
+		即以compose(也是middleware)將REDUX_DEVTOOLS和redux-thunk串成一個參數
+		最後，原本的store改為
+		const store = createStore(reducer, enhancer);
+
+	於TodoList的componentDidMount內
+		可將ajax請求整個函數移植到getTodoList()內(action = getTodoList(); store.dispatch(action);)
+		即達成了action也可以為函數的目的(原本只能是object)
+		import {getTodoList,......} from './store/actionCreators.js';
+
+	於store/actionCreators.js內新增
+		export const getTodoList() => {
+			return (dispatch) => {
+				(剛剛的整個異步函數，其中store.dispatch可寫dispatch即可，因為這個method以參數的方式傳遞進actionCreators內)
+			}	
+		}
+
+redux-saga middleware：可完全代替redux-thunk，不同的點是，saga讓異步的action被獨立到sagas.js內管理
+	待補(6.6 6.7)
+
+react-redux
+	於工作目錄
+		yarn add react-redux
+	創建store/index.js及store/reducer.js，並完成基本設定(方法同上介紹)
+
+	於src/index.js內
+		import TodoList from './TodoList';
+		import {Provider} from 'react-redux';		//react-redux核心API
+		import store from './store/index';
+	  定義	const App = (	//App名字自訂
+			<Provider store={store}>		註：代表於<Provider>內的所有組件都會連接到同一個store
+				<TodoList/>
+			<Provider>
+		) 
+	  最後	ReactDOM.render(App, document.getElementById('root'));
+
+	於TodoList.js內
+		import {connect} from 'react-redux';		//react-redux核心API
+
+		const mapStatetoProps = (state) => {		//此函數將store的state映射到props中
+			return {
+				inputValue: state.inputValue,
+				list: state.list
+			}
+		}
+
+		const mapDispatchtoProps = (dispatch) => {	//此函數將action的dispatch方法以props傳遞
+			return {
+				<自訂義方法>(){			//於return中定義多種method
+					const action = {};
+					dispatch(action);
+				}
+			}
+		}
+
+		當以上兩個規則定義好後，於render內的參數及method調用，都要以this.props.<參數或方法>而非原本的this.<...>
+		或者也可以在render內額外用const {inputValue, list, <方法>, ...} = this.props使代碼更簡潔
+		因為TodoList在此僅為UI組件，故以可以用函數型組件表達，上方提到的簡潔寫法要改為const {inputValue, list, <方法>, ...} = props
+
+	  最後	export default connect(mapStatetoProps, mapDispatchtoProps)(TodoList);	//表以mapStatetoProps及mapDispatchtoProps兩規則將TodoList與store作連接
+
+	當專案便龐大時，為了避免reducer程式碼過於繁重，必須將reducer拆分成子reducer
+		在某個獨立組件的工作目錄中新增store/reducer.js，並將原reducer內與該組件相關的代碼放進子reducer
+		於父reducer內
+			import {combineReducers} from 'redux';
+			import <自定義子reducer名 ex: headerReduecer> from '<子reducer位址>'
+
+			const reducer = combineReducers({
+				//範例
+				header: headerReducer	//header將指向於header組件目錄內的子reducer
+			});
+
+			export default reducer;
+		最後，於header組件內的mapStateToProps中，原本的state.<data>要改為state.header.<data>
+
+	actionCreators及actionTypes的建立
+		在完成reducer的拆分後，於子store目錄同樣要使用actionCreators.js及actionTypes.js
+		actionCreators
+			其內以export const (functionname) = (接受參數) => {type,參數}來導出action
+
+		actionTypes
+			其內以export const (capitalized action type) = '<組件目錄名>/(action type)';來導出
+			當某檔案(如actionCreators)要使用type時，於該檔案
+				import * as actionTypes from './actionTypes';
+			並將type的內容改為type: actionTypes.<capitalized action type>
+
+		index.js(即該組件的子store.js)：創立後，在其他檔案只要引入此index.js，即可使用該組件的子store
+			import reducer from './reducer';
+			import * as actionCreators from './actionCreators';
+			import * as actionTypes from './actionTypes';
+
+			export { reducer, actionCreators, actionTypes };
+
+		於欲使用該組件子store的檔案內，若要派發action則
+			import { actionCreators } from '<該組件的子store位址>'
+			並可將const action = <函數名>(); 改成 actionCreators.<函數名>();
+			或直接刪掉，直接dispatch(actionCreators.<函數名>());	
+
+	immutable(非必要)：將defaultstate的data改成唯讀，避免直接修改state(要return新的、與原本各自獨立的state)
+		yarn add immutable
+		
+		於子reducer內
+			import { fromJS } from 'immutable';	//此函數會將JS物件轉成immutable物件(即唯讀不可修改)
+		將原本的defaultState = {...} 改成defaultState = fromJS({...})
+		並將reducer內的return <新state>改成return state.set('<data名>', <data新值>);	註：immutable物件的set函數會參考原本的state並生成新的state回傳
+		
+		於使用該子reducer的組件，mapStateToProps的內容(ex: focused: state.header.focused)要改為(ex: focused: state.header.get('focused'))	註：immutable物件的get函數會獲取immutable物件內的子元素值
+	
+	redux-immutable(非必要)(待補7.10)
+
+css樣式問題：因為在react中導入css會影響到每個檔案，故不建議使用css，建議使用第三方套件styled-components
+	於工作目錄
+		yarn add styled-components
+	完成後，往後的樣式檔案皆改為js檔
+
+	全局樣式：createGlobalStyle
+		於style.js內
+		import {createGlobalStyle} from 'styled-components';
+		export const GlobalStyle = createGlobalStyle`<css內容>`		註：可用reset.css在不同的瀏覽器統一格式
+
+		於index.js內導入後，於render以組件方式使用GlobalStyle
+
+	個別樣式：styled
+
+	
+react-transition-group：(待補)https://reactcommunity.org/react-transition-group/
+	須先下載
+		npm install react-transition-group --save
+	於工作目錄內
+		yarn add react-transition-group
+
+antd樣式：
+	於工作目錄內
+		yarn add antd
+	於組件檔案內
+		import 'antd/dist/antd.css'	然後於網站上找適合的樣式代碼

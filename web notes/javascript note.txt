@@ -1,0 +1,492 @@
+測試js：ctrl+shift+K
+換行：shift+ENTER
+
+宣告變數：let/var <varialbe name>;
+	let：一般變數，也可以只於block{}內有效，區域變數常用(不可re-declare)
+	var：一般變數，有可能出錯(可re-declare)
+	const：唯讀變數，但與c的唯讀不同，js的唯讀陣列或物件可改內容，但不行重新賦值，性質類似let
+		EX: 宣告陣列
+			const cars = ["a", "b", "c"];
+			cars[0]="d";	#可以
+			cars = ["d", "e", "f"]	#不行
+		EX: 宣告物件(object)
+			const car = {type:"Fiat", model:"500", color:"white"};
+	
+	賦值(已宣告)：<varialbe> = <value>
+	宣告加賦值：let/var/const <variable> = <value>;
+	賦值後呼叫：<variable>;
+
+物件(object)：const <物件名> = {<property1>: value1, <p2>: v2, ...};
+	存取property值：
+		<物件名>.<property> 或 <物件名>["<property>"]
+	property也可以指向function：
+		EX: const person = {
+			firstName: "John",
+			lastName: "Doe",
+			fullName: function() {
+				return this.firstName + " " + this.lastName;	註：this同python的self
+			}
+		}
+
+Date：const d = new Date()
+	創建方式(當賦值給變數時，會自動轉成字串)
+		new Date()
+		new Date(year, month, day, hours, minutes, seconds, milliseconds)
+			若只給一個參數會被認定為milliseconds
+		new Date("<date string>")
+			date string格式
+				YYYY-MM-DDTHH:MM:SSZ	ISO標準
+					T為間隔日期和小時的分隔符號
+					Z表UTC時間，若要變時區，將Z改成(+HH:SS或-HH:SS)
+		Date.parse("<date string>")
+			回傳從1970/1/1以來的毫秒數(為number非字串)
+
+	普通method
+		.toUTCString()		轉成標準時間的字串
+		.toDateString()		轉成只含日期的字串
+		.toISOString()		轉成ISO標準的字串
+
+	get method
+		.getTime()		回傳自1970/1/1以來的毫秒數
+		.getFullYear()		回傳年數
+		.getMonth()		回傳月數(注意為0~11)
+		.getDate()		回傳日數(1~31)
+		.getHours()		回傳小時數(0~23)
+		.getMinutes()		回傳分鐘數(0~59)
+		.getSeconds()		回傳秒數(0~59)
+		.getMilliseconds()	回傳毫秒數(0~999)
+		.getDay()		回傳星期幾(注意為0~6 sunday開始)
+		若要轉成UTC，則在get後加上UTC
+
+	set method
+		將上述的get改成set可以自訂義時間，其中
+		.setFullYear() 	可吃年月日三個參數 		EX: .setFullYear(2021, 8, 4)
+		.setDate() 	可以增加額外天數，且會自動進位	EX: d.setDate(d.getDate() + 50)
+字串
+	字串長度：<string>.length	#字串為物件
+	
+	若要多行字串，可用+來連接
+
+	字串分割：<string>.slice(<start>, <end>)
+		若結束位省略，則回傳起始位後全部
+		可為負值
+		
+		類似功能還有substring(<start>, <end>)(不可為負)、substr(<start>, <length>)
+		
+	字串替換：<string> = <string>.replace("<old>", "<new>")
+		/<old>/i	不管大小寫(insensitive)
+		/<old>/g	替換所有符合目標(預設只替換第一個)(global match)
+
+	轉換大小寫：<string> = <string>.toUpperCase()
+		    <string> = <string>.toLowerCase()
+
+	連接多個字串：<new_str> = <str1>.concat("<str2>", "<str3>");
+
+	去除兩側空格(中間保留)：<string>.trim()
+
+	字首/字尾補值：<string>.padStart(<新字串長度>, <補值>)
+		       <string>.padEnd(<新字串長度>, <補值>)
+
+			EX: let text = "5";
+			    text.padStart(4,0); >>> 0005
+
+	存取字串：<string>.charAt(<位置>) 
+	       或 <string>[位置]	(盡量不要用，因為js的字串不是陣列)
+
+	回傳UTF-16 code：<string>.charCodeAt(<位置>)
+
+	回傳位置：<string>.indexOf("<字串>", <起始位置>)		註：起始位置可省略
+		  <string>.search("<字串>")	#無法給起始位置
+
+	回傳最後位置：<string>.lastIndexOf("<字串>", <起始位置>)	註：由後往回找
+
+	回傳符合陣列：<string>.match("<字串>")	#用regular expression
+		regular expression
+			/字串/g		global match
+			/字串/i		insensitive
+
+	判斷是否包含：<string>.include("<字串>", <start=0>)
+
+	判斷是否以目標字串開頭：<string>.startsWith("<字串>", <start=0>)
+
+	判斷是否以目標字串結尾：<string>.endsWith("<字串>", <length=0>)
+
+	字串轉成陣列：<string>.split("<分隔字串>")
+
+Template Literals：let text = `<字串>`	(python的f-string)
+	插入變數
+		`${變數名}`
+		EX: let place = "my house";
+		    `welcome to ${place}.`;
+
+	js上寫HTML
+		EX: let header = "example";
+		    let tags = ["1", "2", "3"];
+		
+		    let html = `<h1>$<header></h1><ul>`;
+		    for (const x of tags){
+			html += `<li>${x}</li>`;
+ 		    }
+		    html += `</ul>`;
+	
+number
+	判斷是否為合法number：isNaN(<number>)	#若not a number(NaN)回傳true
+
+	正負無限大：Infinity/-Infinity
+
+	十六進位：0x開頭接兩位十六位進位數字
+		EX: let x = 0xFF;	#x = 255
+
+	轉換(2~32進位)：<number>.toString(<進位方法>)
+		EX: let num = 4;
+		    num.toString(2); >>> 回傳 10
+
+	轉成字串：<number>.toString()
+
+	轉成科學記號：<number>.toExponential(<精度>)
+	
+	精度：<number>.toFixed(<精度>)
+	      <number>.toPrecision(<總共幾位(含整數位)>)
+
+	轉換其他資料型態為number：Number(<...>)
+
+	回傳字串中第一個數字並轉為為整數：parseInt("<字串>")
+
+	回傳字串中第一個數字：parseFloat("<字串>")
+
+	number物件
+		Number.MAX_VALUE		js中最大值
+		Number.MIN_VALUE		js中最小值
+		Number.POSITIVE_INFINITY
+		Number.NEGATIVE_INFITY
+		Number.NaN
+
+陣列：const arr = [...]		#元素也可以為物件	#見https://www.w3schools.com/js/js_array_iteration.asp
+	長度：<array>.length
+
+	回傳位置：<array>.indexOf(<元素>, <start=0>)
+		  <array>.lastIndexOf(<元素>, <start=0>)
+
+	整理(只適用字串第一個字元)：<array>.sort()
+
+	整理數字(整理完後可求最大最小值，無內建方法)(當陣列元素為物件，也可以用sort但要注意格式)
+		小到大：<array>.sort(function(a,b){return a-b})
+
+		大到小：<array>.sort(function(a,b){return b-a})
+	
+		隨機整理：<array>.sort(function(a,b){return 0.5-Math.random()})
+
+		更隨機的方法(yates method)
+			const points = [40, 100, 1, 5, 25, 10];
+
+			for (let i = points.length -1; i > 0; i--) {
+ 		 		let j = Math.floor(Math.random() * i)
+ 				let k = points[i]
+ 		 		points[i] = points[j]
+ 		 		points[j] = k
+			} 
+
+	自訂義求min max(最快速)
+		function myArrayMax(arr) {
+  			let len = arr.length;
+  			let max = -Infinity;
+  			while (len--) {
+    				if (arr[len] > max) {
+      					max = arr[len];
+    				}
+  			}
+  			return max;
+		} 
+
+		function myArrayMin(arr) {
+  			let len = arr.length;
+  			let min = Infinity;
+  			while (len--) {
+    				if (arr[len] < min) {
+      					min = arr[len];
+    				}
+  			}
+  			return min;
+		} 
+
+	第三方套件求min max
+		function myArrayMax(arr) {
+  			return Math.max.apply(null, arr);
+		}
+
+		function myArrayMin(arr) {
+  			return Math.min.apply(null, arr);
+		}
+
+		註：(null, [1,2,3]) == (1,2,3)
+
+	翻轉：<array>.reverse()
+
+	增加元素：<array>.push(<新元素>)
+		  <array>[<array>.length] = <新元素>
+
+	存取陣列元素(同c)
+		text = "<ul>"
+		for (let i=0; i<len; i++){
+			text += "<li>" + fruits[i] + "</li>";
+		}
+		text += "</ul>";
+
+	存取陣列元素：<array>.forEach(<自訂義>)
+		EX:
+		const fruits = ["Banana", "Orange", "Apple", "Mango"];
+
+		let text = "<ul>";
+		fruits.forEach(myFunction);
+		text += "</ul>";
+
+		function myFunction(value) {
+ 			text += "<li>" + value + "</li>";
+		}
+
+		註：myFunction(value, index, array)會吃三個參數，可依需求省略
+
+	在複製陣列上執行自訂義function：new_arr = arr.map(<自訂義>)
+		EX: 
+		const numbers1 = [45, 4, 9, 16, 25];
+		const numbers2 = numbers1.map(myFunction);
+
+		function myFunction(value, index, array) {
+  			return value * 2;
+		}
+		
+		註：此時numbers2為可呼叫的陣列，自訂義函式的參數同上
+
+	在複製陣列上進行過濾測試：new_arr = arr.filter(<自訂義>)
+		EX:
+		const numbers = [45, 4, 9, 16, 25];
+		const over18 = numbers.filter(myFunction);
+
+		function myFunction(value, index, array) {
+  			return value > 18;
+		} 
+
+	在複製陣列上加總：
+		EX: 
+		const numbers = [45, 4, 9, 16, 25];
+		let sum = numbers.reduce(myFunction);
+	
+		function myFunction(total, value, index, array) {
+  			return total + value;
+		} 
+
+		註：total為首位數值/上一回傳值
+
+	判斷是否為陣列：Array.isArray(<Array>)
+		     或 <array> isinstanceof Array
+
+	陣列轉成字串：<array>.toString()
+	
+	轉成字串並以特定字串分隔：<array>.join("<字串>")
+
+	移除最後一個元素：<array>.pop()		#可以賦值給別的變數
+
+	移除第一個元素：<array>.shift()		#可以賦值給別的變數
+
+	添加元素至首位：<array>.unshift(<新元素>)	#若賦值給變數，為陣列長度
+
+	移除特定位置元素：delete <array>[<位置>]	#但會留下undefined的hole，不建議用
+
+	添加/移除多個元素：<array>.splice(<位置>, <刪除後面幾個元素>, <欲添加元素>...)
+	
+	連接陣列或元素：const <new_arr> = arr1.concat(arr2, arr3...)
+
+	切出一段陣列：array.slice(<起始位置>, <結束位置>)
+
+...運算子
+	其餘運算子(rest operator)
+		考慮一求平均函式	
+			let avg = function(arr){
+  				let sum = 0;
+  				for(let i = 0; i < arr.length; i++){
+    					sum += arr[i];
+  				}
+  				return sum / arr.length;
+			}
+		可知arr只能為一陣列，當輸入不為 例：[1,2,3,4,5]而為1,2,3,4,5時會報錯(NaN)
+		則利用其餘運算子，將定義改成function(...arr)即可將多個參數一同轉為同一陣列
+	
+	展開運算子(spread operator)：與其餘運算子相反，會將陣列分解成多個輸入
+		範例
+			let number = [1,2,3,4,5];
+			console.log(Math.max(...number));	//5
+			console.log(...number);			//1,2,3,4,5
+		
+for loop
+	對物件：for in
+		EX: 
+		const person = {fname:"John", lname:"Doe", age:25};
+
+		let text = "";
+		for (let x in person) {
+  			text += person[x] + " ";
+		} 
+	
+	對陣列/字串：for of
+		EX: 
+		const cars = ["BMW", "Volvo", "Mini"];
+		let text = "";
+		for (let x of cars){
+			text += x + "<br>";
+		}
+		
+		EX:
+		let language = "JavaScript";
+
+		let text = "";
+		for (let x of language) {
+			text += x;
+		}
+
+區塊(block)：<區塊名>:{}
+	若區塊中有break會跳出區塊	格式：break <區塊名>;
+	const cars = ["BMW", "Volvo", "Saab", "Ford"];
+	list: {
+  		text += cars[0] + "<br>";
+  		text += cars[1] + "<br>";
+  		break list;
+  		text += cars[2] + "<br>";
+  		text += cars[3] + "<br>";
+	}
+ 
+物件類別class
+	EX:
+	class Car {
+		constructor(name, year){			#constructor(即python def __init__)
+			this.name = name;
+			this.name = name;
+		}
+		
+		age(){						#method
+			let date = new Date();
+			return date.getFullYear() - this.year;
+		}
+	}
+	
+	let myCar = new Car("Ford",2014);	#以new創建Car物件
+	document.getElementById("demo").innerHTML = "my car is "+myCar.age()+"years old.";
+	
+JSON(Javascript object notation)
+	JSON資料範例
+		{
+		"employees":[
+  			{"firstName":"John", "lastName":"Doe"},
+  			{"firstName":"Anna", "lastName":"Smith"},
+  			{"firstName":"Peter", "lastName":"Jones"}
+		]
+		}
+
+	將JSON轉成js object：parse
+		let text = '{ "employees" : [' +
+		'{ "firstName":"John" , "lastName":"Doe" },' +
+		'{ "firstName":"Anna" , "lastName":"Smith" },' +
+		'{ "firstName":"Peter" , "lastName":"Jones" } ]}'; 
+
+		const obj = JSON.parse(text);		#用內建函式將string轉為js object
+
+		 <p id="demo"></p>
+
+		<script>				#可進行物件操作
+		document.getElementById("demo").innerHTML =
+		obj.employees[1].firstName + " " + obj.employees[1].lastName;
+		</script> 
+
+	將輸入轉為JSON語法的字串：stringify
+		EX:
+			JSON.stringify({});                  // '{}'
+			JSON.stringify(true);                // 'true'
+			JSON.stringify('foo');               // '"foo"'
+			JSON.stringify([1, 'false', false]); // '[1,"false",false]'
+			JSON.stringify({ x: 5 });            // '{"x":5}'
+
+HTML DOM(document object model)
+	存取HTML元素method
+		document.getElementById(id)
+		document.getElementsByTagName(name)		#可加[]來存取不同的元素
+			回傳HTML collection(不是陣列，但類似)，包含多個同名元素
+			若let myCollection = document.getElementByName("p");
+			則數量：myCollection.length
+			存取特定元素：myCollection[...]
+		document.getElementsByClassName(name)
+		document.querySelectorAll(element.property)	#回傳所有名為element且class為property的元素，.property若省略則只找element
+			回傳HTML DOM nodelist(非陣列)
+			若let myNodeList = document.querySelectorAll("p");
+			數量：myNodeList.length
+			存取特定元素：myNodeList[...]
+
+	改變HTML元素
+		element.innerHTML =  new html content
+		element.style.property = new style
+			EX: .style.color="blue"
+			    .style.fontFamily="Arial"
+			    .style.fontSize="larger"
+			    .style.visibility="hidden"/"visible"
+			    .style.backgroundColor="<色碼>"
+		element.attribute = new value		#以下兩式作用相同	
+		element.setAttribute(attribute, value)
+
+	增加/刪減HTML元素
+		document.createElement(element)
+		document.removeChild(element)
+		document.appendChild(element)
+		document.replaceChild(new, old)
+		document.write(text)
+
+	事件(Event)		
+		onclick="<js>"		註：不建議用，會汙染html的程式碼
+			EX: <button onclick="document.getElementById("demo").innderHTML = Date()">The time is?</button>
+			此外，還有onchange(HTML element changed)、onmouseover、onmouseout、onkeydown、onmousedown、onmouseup、onload(after browser load the page)
+		document.getElementById(id).onclick = function(){code}
+	
+	事件監聽：element.addEventListener("<event>", <自訂義function>, useCapture)
+		event
+			"click"/"mouseover"/"mouseout"/"mousedown"/"mouseup"/
+			"resize"/"mousemove"
+
+		useCapture=false/true
+			false：event bubbling，表內層元素會先被觸發(預設)
+			true：event capturing，表外層元素先被觸發
+
+	移除事件監聽：element.removeEventListener("<event>", <func>)
+
+箭頭函式(arrow function)
+	範例(當function只有一條程式碼)
+		hello = function() {return "hello world";}
+	  等同	hello = () => {return "hello world";}
+	  等同	hello = () => "hello world";
+
+		若有參數
+			hello = (para) => "hello" + para;
+		  等同	hello = para => "hello" + para;		註：只有一個參數()可省略
+
+Strict mode："use strict";	置於檔案頂部以啟用strict mode
+	strict mode中("use strict";下所有程式碼)，任何變數都要先宣告才能使用，否則會報錯
+
+註解：同C
+判斷相等：===
+判斷不相等：!==
+單行判斷式：<條件true/false> ? <若true則等於> : <若false則等於>
+
+由元素id屬性存取元素：document.getElementById("<id值>")
+	EX: 改變內文
+		<...>.innerHTML = <新內容>;
+	EX: 改變CSS
+		<...>.style.fonSize = "35px";
+
+跳出頁面訊息：alert(<...>)
+
+於主控台顯示：cosole.log(<...>)
+
+將頁面於印表機印出或儲存檔案：print()
+
+測試印出值：doucument.write(<...>)	註：盡量不要用，只用於測試就好
+
+回傳資料型態：typeof <>
+
+
+未看：Math Random Boolean Comparison typeof~error debug~reversed_word dom_animation dom_navigation dom_node

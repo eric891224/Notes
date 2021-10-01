@@ -1,0 +1,13 @@
+基本規則
+	targets:prerequisites
+		command
+	或
+	targets:prerequisites;command
+		command
+	其中targets為欲生成目標；
+	prerequisites為生成targets所需檔案
+	command為make要執行的shell命令
+
+1-1：基本範例
+	test:test.c
+		gcc -o test test.c

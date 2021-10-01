@@ -1,0 +1,109 @@
+區塊級(block)元素：頁面中單獨佔據一行，有開始及結束標籤		EX: <p></p>
+行內(inline)元素：放在區塊即元素內，不會產生新的一行		EX: <em></em>, <a></a>
+空(empty)元素：無結束標籤	EX: <img src="">
+
+
+<!DOCTYPE html>		文件類型(不用管，類似include)
+<html></html>		根(root)元素，所有在該頁面上的內容
+	預設屬性
+		<html lang="en-US">	容易被搜索引擎歸類
+
+<head></head>		不顯示，放重要資訊(關鍵字、頁面說明、CSS等)
+	meta元素
+		<meta charset="utf-8">	用utf-8編碼來顯示文字(不易出現亂碼)
+		<meta name="author" content="Eric">	增加作者
+		或<meta name="description" content="<...>">	增加頁面敘述
+	網頁標題
+		<title><標題></title>
+
+	匯入CSS
+		<link href="CSS檔相對路徑" rel="stylesheet" type="text/css">
+
+	加入網站icon(favicon)
+		儲存圖片到與html相同的目錄，副檔名為.ico，並於<head>中匯入
+		<link rel="shortcut icon" href="<圖檔相對路徑>" type="image/x-icon">
+
+<body></body>		所有會顯示的內容
+	圖片
+		<img src="<圖片相對路徑>" alt="<描述圖片文字>">
+		
+	文件標題(heading)	註：最多六層h1~h6
+		<h1><標題></h1>
+	
+	段落(paragraph)
+		<p><內容></p>
+
+	清單(list)
+		無順序(unordered lists)：項目順序不影響
+			<ul>
+				<li><內容></li>
+				<li><內容></li>
+			</ul>
+		有順序(ordered lists)：項目順序有意義
+			<ol>
+				<li><內容></li>
+				<li><內容></li>
+			</ol>
+		描述(descirption lists)：用於一對主題及描述
+			<dl>
+				<dt><題目或標題></dt>
+				<dd><描述></dd>
+			</dl>
+
+	超連結(link)：使用<a> anchor
+		<a href="<網址>"><連結名稱></a>
+		其他屬性：
+			title="<...>"		當游標移到連結，會提示顯示
+			target="_blank"		會開啟新分頁，若要再原頁開啟則忽略此項
+			dowload="<檔名>"	頁面開啟後下載		
+			href="mailto:<Email>"	Email寄信連結
+		網址也可以是其他文件，或是文件內的片段(以#尋找特定id EX: ....html#id_value)
+	
+	輸入(input)
+		<input type="text">
+		其他屬性：
+			disabled="disabled"	停用輸入(="disabled"可省略)(為布林屬性)
+
+	粗體字：用<strong> 或 <b>
+		<strong><文字></strong>
+
+	斜體字：用<em>
+		<em><文字></em>
+
+	上下標：<sup>及<sub>
+		<sup><上標內容></sup>
+		<sub><下標內容></sub>
+	
+	Italic：<i>
+
+	底線：<u>
+
+	換行(line break)：<br>
+
+	很長的水平線(horizontal rule)：<hr>
+
+	字元引用
+		<	&lt;
+		>	&gt;
+		"	&quot;	(quotation)
+		'	&apos;	(apostrophe)
+		&	&amp;	(ampersand)
+
+	匯入javascript		註：將此命令放在body最底部避免錯誤
+		<script src="<js檔相對路徑>"></script>
+
+一般網頁的架構(body內部：header(包含標題)、navigation bar(包含導覽清單)、main(包含主要內容)、side bar(包含相關內容)、footer(包含頁面底部資訊))
+	<header>：包住頁面標題(<h1>等等)的分類
+
+	<nav>(navigation)：包住其他頁面導覽清單(如相關網站連結)
+
+	<main>：包住主要內容，一般只放一個
+
+	<section>：可與<main>選擇使用，一般包住含獨立功能的內容
+
+	<aside>(side bar)：包住相關內容(如其他頁面)，一般放在main裡面
+	
+	<footer>：頁面底部資訊，常常多個頁面共用
+
+	若想不到更好的分類方式可用<div>(block level)、<span>(inline level)來包住資訊
+	

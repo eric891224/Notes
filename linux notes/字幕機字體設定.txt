@@ -1,0 +1,20 @@
+報錯(音響設置)
+cat <<EOF | sudo tee /etc/modprobe.d/blacklist-rgb-matrix.conf
+blacklist snd_bcm2835
+EOF
+
+sudo update-initramfs -u
+
+字體
+sudo apt-get install otf2bdf
+
+下載要用的字體.ttf(TrueType)，將ttf轉為bdf
+	otf2bdf -v -o <bdf檔案輸出路徑>.bdf -r 72 -p 28 <ttf檔案路徑>.ttf
+
+於utils內
+	make text-scroller	
+
+用text-scroller輸出led
+	sudo ./text-scroller -f ../fonts/<剛剛的字體>.bdf -C255,0,0 --led-chain=2 --led-cols=64 --led-rows=64 -s2 "字串"
+	EX:
+		sudo ./text-scroller -f ../fonts/chinese_test.bdf -C255,0,0 --led-chain=2 --led-cols=64 --led-rows=64 -s2 "測試"

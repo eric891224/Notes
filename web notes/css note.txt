@@ -1,0 +1,84 @@
+CSS架構
+	<selector> {
+		<property>: <value>;
+	}
+	其中，selector為元素名
+		
+	      property為該元素的屬性
+	      value為該屬性其中之一的樣式
+
+	例子：改變段落(p)顏色
+		p {
+			color: red;
+		}
+
+	例子：改變多種屬性
+		p {
+			color: red;
+			width: 500px;
+			broder: 1px solid black;
+		}
+
+	例子：選擇多個元素
+		p,li,h1 {
+			color: red;
+		}
+各種selector
+	元素選擇器(element selector)
+		ex: p
+	ID選擇器
+		ex: #my-id	(當<p id="my-id">)
+	class選擇器
+		ex: .my-class	(當<p class="my-class">)
+	屬性選擇器
+		ex: img[src]	(當<img src="image.png">)
+	虛擬class選擇器
+		ex: a:hover	(控制<a>但只有當游標停留在上面)
+	若目標元素為某元素的子項目
+		父元素 > 子元素 {}
+
+常見屬性
+	display：元素顯示的特性
+		block		佔據一整行
+		inline 		字體有多長就多長
+		none 		隱藏
+		flex 		適應不同螢幕尺寸		
+
+	position：調整位置，預設static
+		static 		由上而下，由左至右
+		relative 	相對位置	
+		absolute 	絕對位置
+		fixed 		固定位置
+			fixed又分為top / right / bottom / left	
+
+	margin(跟其他標籤的距離) > border(框線) > padding(留白) > width/height
+		先垂直再水平，最多四個參數，可設auto 
+
+	background/background-color/background-image	註：background為後兩者共同使用
+
+	text：設定段落，例如像是置左中右
+		text-align
+			left/right/center
+		line-height(文字上下間隔)
+			<數值>px/<數值>%
+
+	font：比段落更小的就是文字(font)，可以控制像是字體大小、字體粗細、顏色、字型
+		font-size	字體大小
+			<數值>px
+		font-weight	字體粗細
+			normal(預設)/bold/bolder/lighter/100~900
+		color 		字體顏色
+			<顏色>
+		font-family	字型
+			<字型名稱>
+
+	border(占空間)/outline(不占空間)
+
+	float/clear：文繞圖效果，大多數拿來使用排版
+		float: left/right
+		clear: left/right/both
+		
+	opacity(透明度)：0~1
+	
+	transition(過渡)：<property=all/none/特定css屬性> <duration(ex:1s)> <func=ease/linear/ease-in/...> <delay(ex:1s)>
+		(待補)

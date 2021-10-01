@@ -1,0 +1,98 @@
+socket的創建：int socket(int af, int type, int protocol);
+	af(address family)：ip地址類型
+		AF_INET		ipv4
+		AF_INET6	ipv6
+
+		註：127.0.0.1為本機地址
+
+	type：數據傳輸方式
+		SOCK_STREAM	面向连接的数据传输方式。数据可以准确无误地到达另一台计算机，如果损坏或丢失，可以重新发送，但效率相对较慢。常见的 http 协议就使用 SOCK_STREAM 传输数据，因为要确保数据的正确性，否则网页不能正常解析。
+		SOCK_DGRAM	表示无连接的数据传输方式。计算机只管传输数据，不作数据校验，如果数据在传输中损坏，或者没有到达另一台计算机，是没有办法补救的。也就是说，数据错了就错了，无法重传。因为 SOCK_DGRAM 所做的校验工作少，所以效率比 SOCK_STREAM 高。
+
+	protocol：傳輸協定
+		IPPROTO_TCP	TCP傳輸協定
+		IPPROTO_UDP	UDP傳輸協定
+		0		讓KERNEL自動選擇type對應的默認協定
+			若AF_INET+SOCK_STREAM，則默認為TCP協定
+			若AF_INET+SOCK_DGRAM，則默認為UDP協定
+			故為了方便可直接設0
+
+	創建socket的方式
+		int tcp_socket = socket(AF_INET, SOCK_STREAM, 0);
+		int udp_socket = socket(AF_INET, SOCK_DGRAM, 0);
+
+sockaddr_in結構體：保存IPV4的結構體
+	struct sockaddr_in{
+        	sa_family_t     sin_family;   //地址族（Address Family），也就是地址类型，注意要與socket的第一個參數保持一致
+        	uint16_t        sin_port;     //16位的端口号，一般取1024~65546之間的端口號(要以htons()轉換)，因為uint16_t長度為兩個位元，而0~1023的端口號一般會被系統分配給特定的服務程序
+        	struct in_addr  sin_addr;     //32位IP地址，為struct in_addr結構體，下面會介紹
+        	char            sin_zero[8];  //不使用，一般用0填充，通常以memset將其填充0
+	};
+
+in_addr結構體
+	struct in_addr{
+        	in_addr_t  s_addr;  //32位的IP地址，in_addr_t 在头文件 <netinet/in.h> 中定义，等价于 unsigned long，长度为4个位元。也就是说，s_addr 是一个整数，而IP地址是一个字符串，所以需要 inet_addr() 函数进行转换
+	};
+
+sockaddr結構體：sockaddr 是一种通用的结构体，可以用来保存多种类型的IP地址和端口号，而 sockaddr_in 是专门用来保存 IPv4 地址的结构体。
+	struct sockaddr{
+        	sa_family_t  sin_family;   //地址族（Address Family），也就是地址类型
+        	char         sa_data[14];  //IP地址和端口号，長度為2+4+8(sin_port + sin_addr + sin_zero)
+	};
+
+註：另外還有sockaddr_in6結構體來保存IPV6
+	struct sockaddr_in6 { 
+        	sa_family_t sin6_family;  //(2)地址类型，取值为AF_INET6
+        	in_port_t sin6_port;  //(2)16位端口号
+        	uint32_t sin6_flowinfo;  //(4)IPv6流信息
+        	struct in6_addr sin6_addr;  //(4)具体的IPv6地址
+        	uint32_t sin6_scope_id;  //(4)接口范围ID
+    	};
+
+	因為sockaddr本身使用不便，故定義針對ipv4、ipv6的結構體，再強制轉型成sockaddr
+
+bind()將socket與特定IP及端口綁定：int bind(int sock, struct sockaddr *addr, socklen_t addrlen);
+	(server端)
+	int sock		為server的socket
+	struct sockaddr * addr	為server的ip及port資訊(sockaddr的指標)
+	socklen_t addrlen	為addr變量的大小(以sizeof可獲得)
+
+connect()函數用來建立連接：int connect(int sock, struct sockaddr *serv_addr, socklen_t addrlen);
+	(client端)
+	int sock		為client的socket
+	struct sockaddr * addr	為server的ip及port資訊(sockaddr的指標)
+	socklen_t addrlen	為addr變量的大小(以sizeof可獲得)
+
+listen()：server端以bind()綁定socket後，須以listen()让套接字进入被动监听状态(再调用 accept() 函数，就可以随时响应客户端的请求)
+	int listen(int sock, int backlog);
+		int sock 	為要進入監聽狀態的socket
+		int backlog	為請求隊列的最大長度
+
+accept()：當socket處於監聽狀態，通過accept來接收client請求，最後會返回新的套接字(后面和客户端通信时，要使用这个新生成的套接字，而不是原来服务器端的套接字)
+	int accept(int sock, struct sockaddr *addr, socklen_t *addrlen);
+		int sock 		為server端的socket
+		struct sockaddr * addr 	為接收到的請求(client端)的addr位址
+		socklen_t * addrlen	為addr長度的位址(以sizeof()取得)
+
+	註：listen() 只是让套接字进入监听状态，并没有真正接收客户端请求，listen() 后面的代码会继续执行，直到遇到 accept()。accept() 会阻塞程序执行（后面代码不能被执行），直到有新的请求到来
+
+socket數據接收及發送
+	LINUX：write()向套接字中写入数据；read()从套接字中读取数据   (Linux不区分套接字文件和普通文件)
+		write()：ssize_t write(int fd, const void *buf, size_t nbytes);	//将缓冲区 buf 中的 nbytes 个字节写入文件 fd，成功则返回写入的字节数，失败则返回 -1
+			fd	要寫入的目標socket
+			buf	要寫入數據的緩沖區位址
+			nbytes	寫入數據的位元數
+			
+		send()：ssize_t send(int fd, const void *buf, size_t len, int flags);
+			前三項同write()，為write()的衍生型
+			flags	代表接收的相關細節，通常是設定為0，也存在其他巨集處理一些特殊要求，比如blocking/nonblocking與超額傳輸等等
+
+		read()：ssize_t read(int fd, void *buf, size_t nbytes);		//从 fd 文件中读取 nbytes 个字节并保存到缓冲区 buf，成功则返回读取到的位元数（但遇到文件结尾则返回0），失败则返回 -1
+			fd	要讀取的目標socket
+			buf	接收到的數據的存放地址
+			nbytes	接收到的數據的位元數(一般用buf的大小)
+		
+		recv()：ssize_t recv(int sockfd, void *buf, size_t len, int flags);
+			同send()，為read()的衍生型
+
+	WINDOWS：(待補)

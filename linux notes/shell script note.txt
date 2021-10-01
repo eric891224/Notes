@@ -1,0 +1,544 @@
+centos進入控制台模式：ctrl+alt+f2
+centos進入圖形介面模式：ctrl+alt+f1
+
+基本命令格式：<command> (<選項> <參數>)
+
+印出字串：echo
+	單行
+		echo "<字串>"
+	多行字串
+		echo "
+		<字串1>
+		<字串2>
+		"
+
+#	註釋
+#!	告知直譯器位置
+
+1-1：印出字串
+	#!/bin/bash		#!告知系統直譯器位置；/bin/bash直譯器bash位置
+	echo "hello world!"	字串
+
+read <自訂名稱>		從終端機讀入並賦值給<自訂名稱>
+echo $<自訂名稱>	輸出<自訂名稱>的數值
+
+1-2：印出字串
+	#!bin/bash
+	echo "who are you?"
+	read PERSON		賦值給PERSON
+	echo "hello,  $PERSON."	輸出PERSON數值
+
+若要直接執行sh檔，需要先有x權限：chmod +x <檔名>.sh
+				 ./<檔名>.sh 即可執行
+或是以bash執行sh檔：bash <檔名>.sh
+強制執行：source <檔名>.sh 或 . <檔名>.sh (注意此指令會以當前同一PID執行)
+印出PID：echo $$
+
+變量賦值：
+	variable=value/'value'/"value"	註：shell中不管輸入為何都會以字串型態儲存
+					註：''會純粹顯示整個字串；""會解析裡面是否有變量
+
+變量賦值命令：
+	variable=`command`/$(command)
+		ex: print_hello=$(echo "hello")
+		    echo $print_hello	>>>>	hello
+唯讀變量：
+	variable = ...
+	readonly <variable>	(在下行宣告唯讀)
+
+刪除變量：
+	unset variable
+
+印出變量：
+	echo $variable
+	echo ${variable}		註：{}可不加，但加了可幫助辨識範圍
+
+休眠：sleep + <數字>s		等待<數字>秒
+數學計算命令：((<算式>))	ex: echo "$((3-2))" >> 1
+
+位置參數：$n	(編寫script時，$n表執行script時附帶的參數)
+	註：當參數過多(比如說多過10)，為了幫助辨識可以用${n}
+
+	3-1：位置參數範例
+		#!/bin/bash
+		echo "name: $1"
+		echo "age: $2"
+		上方代碼儲存後，在終端機執行時：
+			bash shell_3-1.sh Eric 20
+			>>>name: Eric
+			   age: 20
+
+	3-2：給函數位置參數
+		#!/bin/bash
+	
+		function func(){
+			echo "name: $1"
+			echo "age: $2"
+		}
+
+		func Eric 20
+		上方代碼儲存後，在終端機執行時：
+			bash shell_3-2.sh
+			>>>name: Eric
+			   age: 20
+
+特殊參數
+	$0	當前script所使用shell(ex: bash)
+	$n	即位置參數(n>=1)
+	$#	傳遞給script或function的參數數量
+	$*	所有參數
+	$@	所有參數
+		註：當$*和$@不被""包圍，兩者相同；
+		    當被""包圍，"$*"會將所有參數看成一份數據
+				"$@"會將每個參數各自看成獨立數據
+		    用for印出"$@"、"$*"時即可看出差別
+	$?	上一個命令的退出狀態；函數返回值
+	$$	當前的PID
+
+	4-1：特殊參數範例
+		#!/bin/bash
+		echo "PID: $$"
+		echo "shell name: $0"
+		echo "first para: $1"
+		echo "second para: $2"
+		echo "all para 1: $*"
+		echo "all para 2: $@"
+		echo "total number of para: $#"
+		儲存後，於終端機：
+			bash shell_4-1.sh wow hello
+			>>>PID: 5943
+			   shell name: bash
+			   first para: Shell
+			   second para: Linux
+			   all para 1: Shell Linux
+			   all para 2: Shell Linux
+			   total number of para: 2
+	同理如3-2，函數也以此類推
+
+	4-2：$?範例
+		#!/bin/bash
+		if [ "$1" == 100 ]
+		then
+			exit 0 #參數正確，退出狀態為0
+		else
+			exit 1 #參數錯誤，退出狀態為1
+		fi
+		儲存後，於終端機：
+			bash shell_4-2.sh 100
+			echo $?
+			>>> 0
+			bahs shell_4-2.sh 89
+			echo $?
+			>>> 1
+
+	4-3：$?在function的範例
+		#!/bin/bash
+		function add(){
+			return $(expr $1 + $2) 
+		}
+		add 23 50
+		echo $?
+		儲存後，於終端機：
+			bash shell_4-3.sh
+			>>> 73
+
+字串
+	""內若有變量會被解析(""內可以出現"" 但要加上跳脫字元\)
+	''純粹顯示內部字元(''內不得出現'')
+	不被引號包圍的字串不能有空格，否則會被視為不同命令
+
+	5-1：字串範例
+		#!/bin/bash
+		n=74
+		str1=hello$n
+		str2="hello \"shell\" $n"
+		str3='hello $n'
+	
+		echo $str1
+		echo $str2
+		echo $str3
+		儲存後，於終端機：
+			bash shell_5-1.sh
+			>>> hello74
+			    hello "shell" 74
+			    hello $n
+
+獲得字串長度：${#str}
+
+	5-2：獲得字串長度
+		#!/bin/bash
+		str="hello"
+		echo ${#str}
+		儲存後，於終端機：
+			bash shell_5-2.sh
+			>>> 5
+
+5-3：字串連接範例
+	#!/bin/bash
+	word1="hello"
+	word2="world"
+
+	str1=$word1$word2				#中間不能有空格
+	str2="$word1 $word2"				#若被""包圍，中間可以有空格
+	str3=$word1": "$word2				#若被""包圍，中間可以有別的字串
+	str4="$word1: $word2"				#也可以這樣寫
+	str5="${word1}Tom: ${word2}is beautiful!"	#若字串複雜，以{}幫助辨識
+
+	echo $str1
+	echo $str2
+	echo $str3
+	echo $str4
+	echo $str5
+	儲存後，於終端機：
+		bash shell_5-3.sh
+		>>> helloworld
+		    hello world
+		    hello: world
+		    hello: world
+		    helloTom: worldis beautiful!
+
+字串截取：${str: start: length}	其中str為字串名；
+				start為起始點(從0開始)，若要從右至左則0-start(start>=1)；
+				length為欲截取長度(若省略則截取到最後)
+
+	5-4：字串截取範例
+		#!/bin/bash
+		str="hello world!"
+		echo ${str: 0: 5}
+		echo ${str: 6}
+		儲存後，於終端機：
+			bash shell_5-4.sh
+			>>> hello
+			    world!
+
+截取指定字串：
+	截取第一個特定字串右邊全部：${str#*chars}	註：str為字串名；
+						    	    chars為指定字串；
+						    	    *表任意長度字串，*chars表chars和chars左邊字串
+						     	    #表忽略左邊字串
+	截取最後一個特定字串右邊全部：${str##*chars}
+	截取第一個特定字串左邊全部：${str%chars*}	註：chars*表chars和chars右邊字串
+							    %表忽略右邊字串
+	截取最後一個特定字串左邊全部：${str%%chars*}	
+
+	5-5：截取特定字串範例
+		#!/bin/bash
+		str=aabbccddeeaabbccddee
+	
+		echo ${str#*bb}
+		echo ${str##*bb}
+		echo ${str%dd*}
+		echo ${str%%dd*}
+		儲存後，於終端機：	
+			bash shell_5-5.sh
+			>>> ccddeeaabbccddee
+			    ccddee
+			    aabbccddeeaabbcc
+			    aabbcc
+
+陣列(bash shell只支持一維陣列)
+	定義陣列：array_name=(e1 e2 e3 ... en)		註：=左右不能有空格
+		ex: arr=(1 2 3 4 5)
+		ex: arr=(1 2 3 "hello")			註：元素類型可以不相同
+	增長陣列
+		ex: arr=(1 2 3 4 5)
+		    arr[5]=6	#增加元素
+	特定元素賦值
+		ex: arr=([3]=24 [5]=19 [10]=12)	#此陣列只有三個元素
+	截取陣列元素
+		ex: n=${num[2]}		#截取第三個元素然後賦值給n
+		ex: echo ${num[2]}	#截取第三個元素然後印出
+
+		註：${num[*]} 或 ${num[@]} 可截取所有元素
+
+	6-1：陣列基本操作
+		#!/bin/bash
+		num=(1 2 3 4 5 6)
+		echo ${num[@]}
+		num[10]=77
+		echo ${num[*]}
+		echo ${num[10]}
+		儲存後，於終端機：
+			bash shell_6-1.sh
+			>>> 1 2 3 4 5 6
+			    1 2 3 4 5 6 77
+			    77
+	
+獲得陣列長度：${#array[@]} 或 ${#array[*]}
+	註：若某元素為字符串，可以用${#array[2]}獲得字串長度(假設第三個元素為字串)
+
+	6-2：陣列長度
+		#!/bin/bash
+		num=(1 2 3)
+		echo ${#num[*]}
+
+		num[10]="hello"
+		echo ${#num[@]}
+		echo ${#num[10]}
+
+		unset num[1]	#刪除元素
+		echo ${num[@]}
+		echo ${#num[@]}
+		儲存後，於終端機：
+			bash shell_6-2.sh
+			>>> 3
+			    4
+			    5
+			    1 3 hello
+			    3
+
+陣列連接：array_new=(${arr1[@]} ${arr2[@]})	#也可以用arr[*]
+
+	6-3：陣列連接
+		#!/bin/bash
+		arr1=(1 2)
+		arr2=(3 "hello")
+
+		arr_new=(${arr1[@]} $[arr2[*]])
+		echo ${arr_new[@]}
+		儲存後，於終端機：
+			bash shell_6-3.sh
+			>>> 1 2 3 hello
+
+刪除陣列或陣列元素：unset array/ unset array[index]
+
+	6-4：刪除陣列範例
+		#!/bin/bash
+		arr=(1 2 3 "hello")
+		unset arr[1]
+		echo ${arr[@]}
+
+		unset arr
+		echo ${arr[@]}
+		儲存後，於終端機：
+			bash shell_6-4.sh
+			>>> 1 3 hello
+			
+
+關聯陣列(類似python的library)：declare -A <陣列名>
+	創建方式一：
+		declare -A color
+		color["red"]="#ff0000"
+		color["green"]="#00ff00"
+		color["blue"]="#0000ff"
+	創建方式二：
+		declare -A color=(["red"]="#ff0000", ["green"]="#00ff00", ["blue"]="#0000ff")
+	獲得所有元素的key：
+		${!arr[@]} 或 ${!arr[*]}
+	獲得所有元素的value：
+		${arr[@]} 或 ${arr[*]}
+
+	6-5：關聯陣列範例
+		#!/bin/bash
+		declare -A color
+		color["red"]="#ff0000"
+		color["green"]="#00ff00"
+		color["blue"]="#0000ff"
+		color["white"]="#ffffff"
+		colot["black"]="#000000"
+
+		#獲得元素key
+		for key in ${!color[@]}
+		do
+			echo $key
+		done
+		echo "*******************"
+
+		#獲得元素value
+		for value in ${color[@]}
+		do
+			echo $value
+		done
+		echo "*******************"
+
+		#列出key-value對
+		for key in ${!color[@]}
+		do
+			echo "${key} --> ${color[$key]}"
+		done
+		儲存後，於終端機：
+			bash shell_6-5.sh
+			>>> red
+			    blue
+			    white
+			    black
+			    green
+			    *******************
+			    #ff0000
+			    #0000ff
+			    #ffffff
+			    #000000
+			    #00ff00
+			    *******************
+		 	   red --> #ff0000
+			    blue --> #0000ff
+			    white --> #ffffff
+			    black --> #000000
+			    green --> #00ff00
+
+alias自訂義命令別名：alias new_name='command'	註：alias只於當前PID有效
+	ex: alias myShutdown='shutdown-h now'
+unalias刪除命令別名：unalias new_name	#刪除某個命令別名
+		     unalias -a		#刪除當前PID所有別名
+	
+	7-1：alias範例(注意此script要用source/.以當前PID執行)
+		#!/bin/bash
+		alias timestamp='date +%s'
+
+		begin=$(timestamp)
+		sleep 5s
+		end=$(timestamp)
+		difference=$((end - begin))
+
+		echo "runtime: ${difference}s"
+		儲存後，於終端機：
+			. shell_7-1.h
+			>>> runtime: 5s
+
+echo其他用法
+	不換行：echo -n "<字串>"
+		
+	7-2：echo -n範例
+		#!/bin/bash
+
+		echo -n "Eric is 20 years old, "
+		echo -n "173cm in height "
+		echo "and 65kg in weight."
+		echo "thank you!"
+		儲存後，於終端機：
+			bash shell_7-2.sh
+			>>> Eric is 20 years old, 173cm in height and 65kg in weight.
+			    thank you!
+
+	跳脫字元(默認不會解析\)：echo -e "<字串>"
+		ex: echo -e "hello \nworld"	#\n會換行
+		    echo -e "hello world \c"	#\c不換行
+		
+	7-3：echo -c範例
+		#!/bin/bash
+
+		echo -e "Eric is 20 years old, \c"
+		echo -e "173cm in height \c"
+		echo "and 65kg in weight."
+		echo "thank you!"
+		儲存後，於終端機：
+			bash shell_7-3.sh
+			>>> Eric is 20 years old, 173cm in height and 65kg in weight.
+			    thank you!
+	
+read 詳細用法：read <-參數> <變量>	註：參數、變量皆可有可無，若無變量則將數據存入環境變量REPLY
+	參數：
+		-a <陣列名>		將讀取的數據存入陣列，由index=0開始往上
+		-d "<delimiter>"	以delimiter作為輸入的結尾，而非ENTER(讀到的數據不含delimiter)
+		-e			讀取時會將輸入編碼轉換
+		-n <number>		讀取到<number>個字元時就停止，不需按ENTER
+		-p "<prompt>"		終端機在接受輸入時會先印出提示字串<prompt>
+		-r			raw mode，不會解釋跳脫字元\
+		-s			silent mode，不會顯示輸入(即不顯示密碼)
+		-t <seconds>		時間限制，超過會return非0之退出狀態，表讀取失敗
+		-u fd			以文件描述符fd作為輸入源(類似重定向)，讀取文件
+	
+	7-4：read多變量賦值
+		#!/bin/bash
+		read -p "Enter your name, height and weight: " name height weight
+		echo "name: $name"
+		echo "height: $height"
+		echo "weight: $weight"
+		儲存後，於終端機：
+			bash shell_7-4.sh
+			>>> Enter your name, height and weight: Eric 173 65<ENTER>
+			    name: Eric
+			    height: 173
+			    weight: 65
+
+	7-5：read讀取有限字元
+		#!/bin/bash
+		read -n 3 -p "Enter 3 characters: " char
+		printf "\n"	#換行(因為-n不需按ENTER所以需要手動換行)
+		echo $char
+		儲存後，於終端機：
+			bash shell_7-5.sh
+			>>> Enter 3 characters: abc
+			    abc
+		
+	7-6：read指定時間輸入密碼範例
+		#!/bin/bash
+		if
+			read -t 20 -sp "Enter password in 20s(first time) : " pass1 && printf "\n" &&	#第一次輸入密碼
+			read -t 20 -sp "Enter password in 20s(second time): " pass2 && printf "\n" &&
+			[ $pass1 == &pass2 ]	#判斷兩次是否相等
+		then
+			echo "valid password"
+		else
+			echo "invalid password"
+		fi
+			註：&&會依次執行命令，只要任一命令失敗(退出狀態非0)，則整個判斷式為false(0)
+		儲存後，於終端機：
+			bash shell_7-6.sh
+			>>> Enter password in 20s(first time) : (已輸入但不顯示)<ENTER>
+			    Enter password in 20s(second time): (已輸入但不顯示)<ENTER>
+			    valid password/invalid password
+
+exit 退出當前PID並返回退出狀態(正常默認0，錯誤為1~255)：exit <退出狀態>
+	7-7：exit範例
+		#!/bin/bash
+		echo "before exit"
+		exit 8
+		echo "after exit"
+		儲存後，於終端機：
+			bash shell_7-7.sh
+			>>> before exit
+			echo $?
+			>>> 8
+
+declare設置變量屬性：declare <+/-><屬性> <變量名(=預先賦值可有可無)>	註：+表取消屬性；-表設置屬性
+	屬性
+		-f <變量名>		列出自訂義函數名及詳細內容
+		-F <變量名>		只列出自訂義函數名
+		-g <變量名>		global變數
+		-p <變量名>		顯示變量屬性和值
+		-a <變量名>		陣列
+		-A <變量名>		關係陣列
+		-i <變量名>		整數
+		-r <變量名=變量值>	唯讀變量(相當於readonly <變量名=變量值>)
+		-x <變量名=變量值>	環境變量(相當於export <變量名=變量值>)
+	
+	7-8：declare範例
+		#!/bin/bash
+		declare -i x y sum	#同時宣告多個整數
+		x=1
+		y=2
+		sum=$x+$y
+		echo $sum
+		儲存後，於終端機：
+			bash shell_7-8.sh
+			>>> 3
+
+	於終端機直接使用的範例：
+		declare -r n=10
+		n=20
+		>>> error! 唯讀
+		echo $n
+		>>> 10
+
+		declare -p n
+		>>> declare -r n="10"
+
+(())整數數學計算命令：((<算式>))	註：(())內的變量不需加$，(())會自動解析變量
+	賦值
+		ex: ((a=10+66))
+		    ((b=a-15))
+		    ((c=a+b))	
+		或
+		ex: a=$((10+66))
+		    b=$((a-15))
+		    c=$((a+b))
+	邏輯運算(1：true 0：false)
+		ex: ((a>7 && b==c))
+	印出
+		ex: echo $((a+10))
+	多算式(由左至右，最後一個算式為輸出結果)
+		ex: ((a=3+5, b=a+10))	#此時a=8, b=18
+		    c=$((4+8, a+b))	#此時c=26
+
+bc整數、浮點數數學運算：http://c.biancheng.net/view/2680.html

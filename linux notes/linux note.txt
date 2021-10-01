@@ -1,0 +1,172 @@
+clear(ctrl+L) 清除終端機
+
+切換到家目錄~：cd ~
+切換到根目錄/：cd /
+切換到上層目錄：cd ..
+切換到上個路徑：cd -
+以目前路徑當開頭：cd ./(...)
+以上個路徑當開頭：cd ../(...)
+
+關機：shutdown now
+
+取得說明：man (...) 或 (...) --help
+
+查看目前路徑：pwd
+
+檔案權限分數(r讀:4 w寫:2 x執行:1)
+	-|---|---|--- 第一個為檔案型態(-表檔案；d表目錄；l表連結檔案)
+		      第二~四部分為owner, group, others的權限
+
+改變檔案權限：chmod (xxx) file
+	ex: rw-rw-r-- 則|owner: 4+2+0=6 故 chmod 664 file
+			|group: 4+2+0=6
+			|other: 4+0+0=4
+	chomd -r/R (xxx) file 目錄下的檔案都會變更
+	也可以用：
+		chmod u(user)/g(group)/o(others)/a(all) +/-/=(set) r/w/x file
+		ex: chmod ug=rw,o=r file.txt
+
+修改檔案user或group：chown
+	chown <username> file.txt 將檔案user改為<username>
+	chown :<groupname> file.txt 將檔案group改為<groupname>
+	chown <username>:<groupname> file.txt 同時修改
+
+列出該目錄下的檔案：ls
+	-l 列出詳細資訊(權限) = ll
+	-t 依時間排序 ex: ls -l -t
+	*.(...) 列出為.(...)的檔案 ex: *.py >> 列出為.py的檔案
+	-h 使用kb mb gb顯示檔案大小 ex: ls -l -h
+	-a 顯示全部檔案(含隱藏檔) = al
+	(資料夾名稱) 直接列出某資料夾內容
+	-S 整理
+	-lS > file.txt 將輸出結果寫到file.txt裡(螢幕不顯示)
+	ls | tee file.txt 將輸出結果寫到file.txt並顯示於螢幕(直接覆蓋原本內容)
+	ls | tee -a file.txt 同上，但內容附加在原本內容後
+
+建立空檔案：touch
+	ex: touch file.py
+	ex: touch file{1..10}.py 一次建立多個空檔案(file1.py~file10.py)
+
+建立資料夾：mkdir
+	mkdir -p dir1/dir2
+	
+	註：-p表自動建立上層目錄，若上層目錄不存在不會報錯
+
+移動/重新命名檔案：mv
+	改檔案或資料夾檔名
+		mv folder folder-new (記得不要加/，否則會改變資料夾內所有檔案)
+		mv file.txt file-new.txt
+	移動檔案
+		mv file.txt </位置>
+	互動式(若有相同檔名會問是否複寫)
+		mv -i file.txt </位置>
+	移動且更新(若資料夾內有相同檔名，但為舊版，會直接覆蓋，否則不會改)
+		mv -u file.txt </位置>
+		
+刪除：rm
+	刪除檔案或資料夾
+		rm file.txt
+		rm -rf <資料夾名稱(不加/)>  
+	
+		註：若資料夾有檔案，不能刪資料夾，故以-r(遞回刪除所有檔案)、-f(強制刪除不警告)清空資料夾
+	刪除特定附檔名
+		rm -f *.<副檔名>	ex: rm -f *.zip
+		rm -f *<檔名>.<副檔名>	ex: rm -f *demo.zip
+
+複製：cp
+	複製資料夾
+		cp -r <source路徑> <destination路徑> 
+		
+		註：-r會遞迴複製資料夾以下所有內容，若destination不存在會自動建立路徑
+	只複製資料夾下的檔案
+		cp -r <source路徑>/. <destination路徑>
+			ex: cp -r dir1/. . (.除了表所有檔案，也可以表現在位置)
+	保留權限(-p 或 --preserve=all)
+		cp -r --preserve=all <source路徑> <destination路徑>
+	參數
+		-i 互動式(問是否複寫)	-n(不詢問直接複寫)
+		-u 更新(同mv)		-v(印出資訊)
+
+查詢檔案：find
+	檔案或資料夾
+		sudo find / -name "dir-name"
+		sudo find / -name "file-name"
+		sudo find / -name "*.conf"
+	於當前目錄下找特定檔名
+		find . -name <檔名>	ex: find . -name README.md
+
+連結檔：ln
+	hard link(目錄不適用)=複製檔案到目前位置(假設目前位置在home目錄 /home)
+		ex: ln /home/eric891224/Downloads/file.txt
+		檔案型態為-(檔案)
+
+	symbolic link(soft link)(目錄也可以用)=捷徑
+		ex: ln -s /home/eric891224/Downloads/file.txt
+		檔案型態為l(連結檔)，若本體刪掉，連結檔會失效 
+
+壓縮/解壓縮
+	下載zip unzip/unrar (tar不用載)
+		sudo apt-get install zip unzip
+		sudp apt-get install unrar
+	zip用法：zip -r <壓縮後檔名> <壓縮前檔名> 
+		 ex: zip -r file.zip file
+	unzip用法：unzip <解壓縮前檔名> -d <解壓縮後目標資料夾(若為當前目錄：.)> 
+		 ex: unzip file.zip -d .
+	unrar用法：unrar <指令> file.rar 
+			e 解壓縮到目錄下
+			l 列出file.rar的資料
+			t 測試file.rar資料是否完整
+	tar用法：tar cvf <壓縮後檔名> <欲壓縮檔案之目錄>
+		 ex: tar cvf file.tar file_folder
+	tar解壓：tar xvf <壓縮前檔名>
+		 ex: tar xvf file.tar
+
+強制停止執行：killall
+	ex: 停止vlc
+		killall vlc
+
+source/ sh bash(待補)
+
+找路徑：where
+	ex: 找python3
+		where python3
+
+傳檔案：scp(securely copy) (待補)
+	查看ip：ip addr show
+	確認有安裝openssh-server：sudo apt-get install openssh-server
+
+下載套件：install
+	sudo apt-get install <套件名>
+
+	若只有.deb檔
+		sudo apt install ./<套件名>.deb
+	更新套件資訊
+		sudo apt-get update
+	更新軟體	
+		sudo apt-get upgrade
+	更新特定軟體(ex: vivaldi)
+		sudo apt update && sudo apt install vivaldi-stable
+	刪除軟體
+		sudo apt-get --purge autoremove <套件名>
+	清除不需要的依賴檔案(殘餘檔案)
+		sudo apt autoremove
+
+下載工具：wget
+	下載wget：sudo apt-get install wget
+	wget用法：wget <url>
+		ex: wget http://ftp.gnu.org/gnu/wget/wget-1.20.3.tar.gz
+	指定下載後檔名：wget -O <custom name> <url>
+
+sudo可以做的事
+	增加新user：sudo useradd <username>
+	設定user密碼：sudo passwd <username>
+	刪除user：sudo userdel <username>
+	增加group：sudo groupadd <groupname>
+	刪除group：sudo groupdel <groupname>
+	添加user到group：sudo usermod -g <groupname> <username>
+	查看所有user：sudo cat /etc/passwd
+	查看所有group：sudo cat/etc/group
+
+切換使用者：su <使用者名稱>
+
+Reference：https://github.com/twtrubiks/linux-note (從tail開始看)
