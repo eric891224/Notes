@@ -1,0 +1,121 @@
+下載gatsby
+	npm install -g gatsby-cli
+
+建立新的gatsby專案
+	gatsby new
+
+於gatsby專案目錄內(將有localhost:8000及http://localhost:8000/___graphql)
+	gatsby develop
+
+於github新建repo(不要readme,licence...)
+	git remote add git@github.com:<user_name>/<repo_name>.git
+	git branch -M main
+	git push -u origin main
+
+	然後於gatsby cloud新建new site，導入該repo即完成
+
+於src目錄內
+	pages/ 內之所有js檔皆會被視為獨立的頁面，其中index為主頁面
+	images/ 內為頁面icon
+
+<Link/>組件：功能類似<href>，為gatsby內建之組件
+	於頁面js檔內
+		import { Link } from gatsby;
+
+	若要增加切換到(EX: about.js)的link
+		<Link to="/about">to about page</Link>
+
+		EX: 回到主頁面<Link to="/">back to home<Link>
+
+Building Block (Ex: <Layout/>)可複用組件：類似自訂模板
+	於src/components/Layout.js
+		import React from 'react'
+		import { Link } from 'gatsby'
+
+		const Layout = ({ pageTitle, children }) => { //相當於{pageTitle, children} = props
+  			return (
+    				<div>
+      					<title>{pageTitle}</title>
+      					<nav>
+        					<ul>
+          						<li><Link to="/">Home</Link></li>
+          						<li><Link to="/about">About</Link></li>
+        					</ul>
+      					</nav>
+      					<main>
+        					<h1>{pageTitle}</h1>
+        					{children}
+      					</main>
+    				</div>
+  			)
+		}
+
+    export default Layout
+	
+CSS Module樣式用法
+  於src/components/<自定名>.module.css
+    .title {
+      color: blue;
+      font-size: 3rem;
+    }
+
+  於目標組件.js內
+    import { title } from ./<自訂名>.module.css;
+
+    const MyComponent = () => {
+    return (
+      <h1 className={title}> //當className設為Css module形式，會在dom產生唯一且獨特的classname，避免干擾起他組件的樣式
+        Super Sweet Title Page
+      </h1>
+    )}
+
+    export default MyComponent
+
+  若CSS Module內的屬性名稱為axx-bxx-cxx，於js檔內引入時要改為axxBxxCxx
+
+Plugin的使用方式(即第三方套件)：常用gatsby-plugin-image, gatsby-plugin-sharp, ...
+  npm下載plugin
+    npm install <plugin name>
+
+  設定gatsby-config.js
+    // gatsby-config.js
+
+    module.exports = {
+      siteMetadata: {
+        title: "My First Gatsby Site",
+      },
+      plugins: [
+        {
+          resolve: "plugin-name",
+          options: {
+            // Check the plugin README for what options go in here
+          }
+        },
+      ]
+    }
+  
+  重新gatsby develop後，即可使用plugin
+
+gatsby-plugin-image使用方法
+  下載
+    npm install gatsby-plugin-image gatsby-plugin-sharp gatsby-source-filesystem
+  
+  此plugin需要下載額外的dependencies(sharp圖片處裡, filesystem匯入資料)
+
+  於gatsby-config.js內，於plugins新增需要的項目(照該plugin的文檔做)，然後重新gatsby develop
+    module.exports = {
+      siteMetadata: {
+        title: "My First Gatsby Site",
+      },
+      plugins: [
+        "gatsby-plugin-image",
+        "gatsby-plugin-sharp",
+      ],
+    };
+  
+  完成後，可以使用該plugin所提供的StaticImage組件
+  於目標js檔內import { StaticImage } = 'gatsby-plugin-image';
+    src   與<img/>的src作用相同，放入URL
+    alt   該圖片的描述，當圖片載入錯誤才用
+
+  註：若圖片並非在網路(無URL)，而是在本機，可放在src/images內，再以StaticImage之src屬性引入相對路徑
